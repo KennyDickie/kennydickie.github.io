@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boring RPM Calculator</title>
+<style>
+  :root{--bg:#fff;--fg:#111;--muted:#666;--card:#f7f7f7;--border:#e6e6e6;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);}
+  .wrap{max-width:500px;margin:0 auto;padding:24px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+  h1{font-size:1.25rem;margin:0 0 8px}
+  .muted{color:var(--muted);font-size:.9rem;margin:0 0 16px}
+  .row{display:flex;gap:10px;align-items:center;margin:8px 0}
+  .row label{min-width:180px}
+  input[type="number"], select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:#fff}
+  .unit{min-width:64px;text-align:center;color:var(--muted)}
+  .result{margin-top:16px;padding:16px;border:1px dashed var(--border);border-radius:10px;background:#fff}
+  .val{font-size:1.6rem;font-weight:700}
+  .small{font-size:.85rem;color:var(--muted)}
+  code{background:#fff;border:1px solid var(--border);border-radius:6px;padding:2px 6px}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Boring RPM Calculator</h1>
+      <p class="muted">Solves for spindle speed <strong>n (rpm)</strong>. Uses:<br>
+        <span class="small">
+          Imperial: <code>n = (12 · Vc) / (π · D)</code> (Vc in sfm, D in inches)<br>
+          Metric: <code>n = (1000 · Vc) / (π · D)</code> (Vc in m/min, D in mm)
+        </span>
+      </p>
+
+      <div class="row">
+        <label for="system">Units</label>
+        <select id="system">
+          <option value="imperial">Imperial (sfm &amp; inch)</option>
+          <option value="metric">Metric (m/min &amp; mm)</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label id="label-vc" for="vc">Cutting speed Vc</label>
+        <input id="vc" type="number" step="any" value="400">
+        <div id="unit-vc" class="unit">sfm</div>
+      </div>
+
+      <div class="row">
+        <label id="label-d" for="d">Workpiece diameter D</label>
+        <input id="d" type="number" step="any" value="1.0">
+        <div id="unit-d" class="unit">in</div>
+      </div>
+
+      <div class="row">
+        <label for="round">Rounding</label>
+        <select id="round">
+          <option value="1">Nearest 1</option>
+          <option value="5">Nearest 5</option>
+          <option value="10" selected>Nearest 10</option>
+          <option value="25">Nearest 25</option>
+          <option value="50">Nearest 50</option>
+          <option value="100">Nearest 100</option>
+        </select>
+      </div>
+
+      <div class="result">
+        <div class="small">Spindle speed</div>
+        <div class="val"><span id="rpm">—</span> rpm</div>
+      </div>
+
+      <details style="margin-top:14px;">
+        <summary>Optional: feed rate (Vf)</summary>
+        <div class="row">
+          <label for="fn">Feed per rev (f<sub>n</sub>)</label>
+          <input id="fn" type="number" step="any" value="0.006">
+          <div id="unit-fn" class="unit">ipr</div>
+        </div>
+        <div class="result">
+          <div class="small">Feed rate</div>
+          <div class="val"><span id="vf">—</span> <span id="unit-vf">ipm</span></div>
+          <div class="small">Formula: <code>Vf = n · f<sub>n</sub></code></div>
+        </div>
+      </details>
+    </div>
+  </div>
+
+<script>
+function $(id){ return document.getElementById(id); }
+
+function roundTo(n, step){
+  step = Number(step) || 1;
+  return Math.round(n / step) * step;
+}
+
+function compute(){
+  const system = $("system").value;
+  const Vc = Number($("vc").value);
+  const D = Number($("d").value);
+  const step = Number($("round").value);
+
+  let n;
+  if (system === "imperial"){
+    n = (12 * Vc) / (Math.PI * D);
+  } else {
+    n = (1000 * Vc) / (Math.PI * D);
+  }
+  const nRounded = roundTo(n, step);
+  $("rpm").textContent = nRounded.toLocaleString();
+
+  // Feed rate
+  const fn = Number($("fn").value) || 0;
+  let vf;
+  if (system === "imperial"){
+    vf = nRounded * fn;
+    $("unit-vf").textContent = "ipm";
+    $("unit-fn").textContent = "ipr";
+  } else {
+    vf = nRounded * fn;
+    $("unit-vf").textContent = "mm/min";
+    $("unit-fn").textContent = "mm/rev";
+  }
+  $("vf").textContent = vf.toFixed(3);
+}
+
+function updateUnits(){
+  if ($("system").value === "imperial"){
+    $("unit-vc").textContent = "sfm";
+    $("unit-d").textContent = "in";
+  } else {
+    $("unit-vc").textContent = "m/min";
+    $("unit-d").textContent = "mm";
+  }
+  compute();
+}
+
+["system","vc","d","round","fn"].forEach(id => $(id).addEventListener("input", compute));
+$("system").addEventListener("change", updateUnits);
+
+updateUnits();
+</script>
+</body>
+</html>
