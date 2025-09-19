@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Boring RPM Calculator</title>
 <style>
-  :root{--bg:#fff;--fg:#111;--muted:#666;--card:#f7f7f7;--border:#e6e6e6;}
+  :root{--bg:#f7f7fb;--fg:#111;--muted:#666;--card:#ffffff;--border:#e6e6e6;}
   *{box-sizing:border-box}
+  html,body{height:100%}
   body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);}
-  .wrap{max-width:640px;margin:0 auto;padding:24px}
+  .wrap{max-width:640px;margin:0 auto;padding:24px; min-height:460px;} /* ensure it’s not “invisible” */
   .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
   h1{font-size:1.25rem;margin:0 0 8px}
   .muted{color:var(--muted);font-size:.9rem;margin:0 0 16px}
@@ -46,7 +47,7 @@
   }
 </style>
 </head>
-<body>
+<body onload="init()">  <!-- initialize even inside strict iframes -->
   <div class="wrap">
     <div class="card">
       <h1>Boring RPM Calculator</h1>
@@ -130,7 +131,7 @@
     $("rpm").textContent = nRounded.toLocaleString();
 
     const fn = Number($("fn").value) || 0;
-    let vf = nRounded * fn;
+    const vf = nRounded * fn;
     if (system === "imperial"){
       $("unit-vf").textContent = "ipm";
       $("unit-fn").textContent = "ipr";
@@ -152,12 +153,11 @@
     compute();
   }
 
-  // Ensure everything runs after DOM is ready (extra safe in some embeds)
-  window.addEventListener("DOMContentLoaded", () => {
+  function init(){
     ["system","vc","d","round","fn"].forEach(id => $(id).addEventListener("input", compute));
     $("system").addEventListener("change", updateUnits);
     updateUnits(); // triggers first compute()
-  });
+  }
 </script>
 </body>
 </html>
