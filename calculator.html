@@ -5,45 +5,45 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Boring RPM Calculator</title>
 <style>
- :root{--bg:#fff;--fg:#111;--muted:#666;--card:#f7f7f7;--border:#e6e6e6;}
-*{box-sizing:border-box}
-body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);}
-.wrap{max-width:640px;margin:0 auto;padding:24px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
-h1{font-size:1.25rem;margin:0 0 8px}
-.muted{color:var(--muted);font-size:.9rem;margin:0 0 16px}
-.result{margin-top:16px;padding:16px;border:1px dashed var(--border);border-radius:10px;background:#fff}
-.val{font-size:1.6rem;font-weight:700}
-.small{font-size:.85rem;color:var(--muted)}
-code{background:#fff;border:1px solid var(--border);border-radius:6px;padding:2px 6px}
+  :root{--bg:#fff;--fg:#111;--muted:#666;--card:#f7f7f7;--border:#e6e6e6;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);}
+  .wrap{max-width:640px;margin:0 auto;padding:24px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+  h1{font-size:1.25rem;margin:0 0 8px}
+  .muted{color:var(--muted);font-size:.9rem;margin:0 0 16px}
+  .result{margin-top:16px;padding:16px;border:1px dashed var(--border);border-radius:10px;background:#fff}
+  .val{font-size:1.6rem;font-weight:700}
+  .small{font-size:.85rem;color:var(--muted)}
+  code{background:#fff;border:1px solid var(--border);border-radius:6px;padding:2px 6px}
 
-/* --- Single-column layout, always --- */
-.row {
-  display:flex;
-  flex-direction: column;      /* stack label + input + unit */
-  align-items: stretch;        /* inputs fill width */
-  margin: 12px 0;
-}
-.row label {
-  min-width: auto;
-  width: 100%;
-  text-align: left;
-  margin-bottom: 6px;
-}
-.row input[type="number"],
-.row select {
-  width: 100%;
-  padding: 16px 18px;          /* taller */
-  font-size: 1.1rem;           /* bigger text */
-  border:1px solid var(--border);
-  border-radius: 10px;
-}
-.row .unit {
-  min-width: 0;
-  align-self: flex-end;        /* sits to the right under the input */
-  margin-top: 6px;
-  color: var(--muted);
-}
+  /* --- Single-column layout, always --- */
+  .row {
+    display:flex;
+    flex-direction: column;      /* stack label + input + unit */
+    align-items: stretch;        /* inputs fill width */
+    margin: 12px 0;
+  }
+  .row label {
+    min-width: auto;
+    width: 100%;
+    text-align: left;
+    margin-bottom: 6px;
+  }
+  .row input[type="number"],
+  .row select {
+    width: 100%;
+    padding: 16px 18px;          /* taller */
+    font-size: 1.1rem;           /* bigger text */
+    border:1px solid var(--border);
+    border-radius: 10px;
+  }
+  .row .unit {
+    min-width: 0;
+    align-self: flex-end;        /* sits to the right under the input */
+    margin-top: 6px;
+    color: var(--muted);
+  }
 </style>
 </head>
 <body>
@@ -111,60 +111,53 @@ code{background:#fff;border:1px solid var(--border);border-radius:6px;padding:2p
   </div>
 
 <script>
-function $(id){ return document.getElementById(id); }
+  function $(id){ return document.getElementById(id); }
+  function roundTo(n, step){ step = Number(step) || 1; return Math.round(n / step) * step; }
 
-function roundTo(n, step){
-  step = Number(step) || 1;
-  return Math.round(n / step) * step;
-}
+  function compute(){
+    const system = $("system").value;
+    const Vc = Number($("vc").value);
+    const D = Number($("d").value);
+    const step = Number($("round").value);
 
-function compute(){
-  const system = $("system").value;
-  const Vc = Number($("vc").value);
-  const D = Number($("d").value);
-  const step = Number($("round").value);
+    let n;
+    if (system === "imperial"){
+      n = (12 * Vc) / (Math.PI * D);
+    } else {
+      n = (1000 * Vc) / (Math.PI * D);
+    }
+    const nRounded = roundTo(n, step);
+    $("rpm").textContent = nRounded.toLocaleString();
 
-  let n;
-  if (system === "imperial"){
-    n = (12 * Vc) / (Math.PI * D);
-  } else {
-    n = (1000 * Vc) / (Math.PI * D);
+    const fn = Number($("fn").value) || 0;
+    let vf = nRounded * fn;
+    if (system === "imperial"){
+      $("unit-vf").textContent = "ipm";
+      $("unit-fn").textContent = "ipr";
+    } else {
+      $("unit-vf").textContent = "mm/min";
+      $("unit-fn").textContent = "mm/rev";
+    }
+    $("vf").textContent = vf.toFixed(3);
   }
-  const nRounded = roundTo(n, step);
-  $("rpm").textContent = nRounded.toLocaleString();
 
-  // Feed rate
-  const fn = Number($("fn").value) || 0;
-  let vf;
-  if (system === "imperial"){
-    vf = nRounded * fn;
-    $("unit-vf").textContent = "ipm";
-    $("unit-fn").textContent = "ipr";
-  } else {
-    vf = nRounded * fn;
-    $("unit-vf").textContent = "mm/min";
-    $("unit-fn").textContent = "mm/rev";
+  function updateUnits(){
+    if ($("system").value === "imperial"){
+      $("unit-vc").textContent = "sfm";
+      $("unit-d").textContent = "in";
+    } else {
+      $("unit-vc").textContent = "m/min";
+      $("unit-d").textContent = "mm";
+    }
+    compute();
   }
-  $("vf").textContent = vf.toFixed(3);
-}
 
-function updateUnits(){
-  if ($("system").value === "imperial"){
-    $("unit-vc").textContent = "sfm";
-    $("unit-d").textContent = "in";
-  } else {
-    $("unit-vc").textContent = "m/min";
-    $("unit-d").textContent = "mm";
-  }
-  compute();
-}
-
-["system","vc","d","round","fn"].forEach(id => $(id).addEventListener("input", compute));
-$("system").addEventListener("change", updateUnits);
-
-updateUnits();
+  // Ensure everything runs after DOM is ready (extra safe in some embeds)
+  window.addEventListener("DOMContentLoaded", () => {
+    ["system","vc","d","round","fn"].forEach(id => $(id).addEventListener("input", compute));
+    $("system").addEventListener("change", updateUnits);
+    updateUnits(); // triggers first compute()
+  });
 </script>
 </body>
 </html>
-
-
