@@ -5,21 +5,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Boring RPM Calculator</title>
 <style>
-  :root{--bg:#fff;--fg:#111;--muted:#666;--card:#f7f7f7;--border:#e6e6e6;}
-  *{box-sizing:border-box}
-  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg);}
-  .wrap{max-width:500px;margin:0 auto;padding:24px}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
-  h1{font-size:1.25rem;margin:0 0 8px}
-  .muted{color:var(--muted);font-size:.9rem;margin:0 0 16px}
-  .row{display:flex;gap:10px;align-items:center;margin:8px 0}
-  .row label{min-width:180px}
-  input[type="number"], select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:#fff}
-  .unit{min-width:64px;text-align:center;color:var(--muted)}
-  .result{margin-top:16px;padding:16px;border:1px dashed var(--border);border-radius:10px;background:#fff}
-  .val{font-size:1.6rem;font-weight:700}
-  .small{font-size:.85rem;color:var(--muted)}
-  code{background:#fff;border:1px solid var(--border);border-radius:6px;padding:2px 6px}
+ /* --- Single-column layout, always --- */
+.row {
+  flex-direction: column;      /* stack label + input + unit */
+  align-items: stretch;        /* inputs fill width */
+}
+
+/* Labels no longer need a fixed width */
+.row label {
+  min-width: auto;
+  width: 100%;
+  text-align: left;
+}
+
+/* Inputs: full width and larger tap targets */
+.row input[type="number"],
+.row select {
+  width: 100%;
+  padding: 16px 18px;          /* taller */
+  font-size: 1.1rem;           /* bigger text */
+  border-radius: 10px;         /* nicer corners */
+}
+
+/* Units: tuck under the input, right-aligned */
+.row .unit {
+  min-width: 0;
+  align-self: flex-end;        /* sits to the right under the input */
+  margin-top: 6px;
+  color: var(--muted);
+}
+
+/* Optional: widen the overall card a bit if you like */
+.wrap {
+  max-width: 640px;            /* was 500px — bump if you want */
+}
 </style>
 </head>
 <body>
@@ -142,3 +161,4 @@ updateUnits();
 </script>
 </body>
 </html>
+
