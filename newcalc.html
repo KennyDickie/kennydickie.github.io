@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boring RPM Calculator</title>
+<style>
+  body { font-family: sans-serif; padding: 1em; }
+  label { display:block; margin-top:1em; }
+  input, select { width:100%; padding:0.6em; font-size:1em; margin-top:0.3em; }
+  .result { margin-top:1.5em; font-size:1.2em; font-weight:bold; }
+</style>
+</head>
+<body>
+  <h2>Boring RPM Calculator</h2>
+
+  <label>Units
+    <select id="system">
+      <option value="imperial">Imperial (sfm & inch)</option>
+      <option value="metric">Metric (m/min & mm)</option>
+    </select>
+  </label>
+
+  <label>Cutting speed Vc
+    <input id="vc" type="number" value="400">
+  </label>
+
+  <label>Workpiece diameter D
+    <input id="d" type="number" value="1.0">
+  </label>
+
+  <label>Rounding
+    <select id="round">
+      <option value="1">Nearest 1</option>
+      <option value="5">Nearest 5</option>
+      <option value="10" selected>Nearest 10</option>
+    </select>
+  </label>
+
+  <div class="result">RPM: <span id="rpm">—</span></div>
+
+<script>
+function $(id){return document.getElementById(id);}
+function roundTo(n, step){return Math.round(n/step)*step;}
+function compute(){
+  const sys=$("system").value;
+  const Vc=+$("vc").value;
+  const D=+$("d").value;
+  const step=+$("round").value;
+  let n=sys==="imperial"?(12*Vc)/(Math.PI*D):(1000*Vc)/(Math.PI*D);
+  $("rpm").textContent=roundTo(n,step);
+}
+["system","vc","d","round"].forEach(id=>$(id).addEventListener("input",compute));
+compute();
+</script>
+</body>
+</html>
