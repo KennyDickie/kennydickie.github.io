@@ -7,30 +7,28 @@
 <style>
   body { font-family: sans-serif; padding: 1em; }
 
-  .form-col {
+  /* Each row = label text (left) + control (right) */
+  label{
     display: grid;
-    grid-template-columns: max-content; /* one column */
-    justify-items: end;                 /* align right edge */
-    gap: 10px;
+    grid-template-columns: 1fr max-content; /* text | control */
+    align-items: center;
+    column-gap: 12px;
     margin-top: 1em;
+    max-width: 520px; /* controls overall row width; adjust if you like */
   }
 
-  label {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    max-width: 260px; /* control form width */
-  }
-
-  input[type="number"], select {
+  /* Controls keep their own widths (so they can differ), but align on the right */
+  input[type="number"], select{
+    width: auto;            /* important: don't force 100% */
     padding: 0.5em;
     font-size: 1em;
+    box-sizing: border-box;
   }
 
-  /* individual widths */
-  #system { width: 200px; }
-  #round  { width: 100px; }
-  input[type="number"] { width: 120px; }
+  /* Individual control widths */
+  #system { width: 200px; }  /* Units dropdown wider */
+  #round  { width: 100px; }  /* Rounding dropdown narrower */
+  input[type="number"] { width: 120px; } /* defaults for numeric fields */
 
   .result {
     margin-top: 1.2em;
@@ -43,37 +41,35 @@
 <body>
   <h2>Boring RPM Calculator</h2>
 
-  <div class="form-col">
-    <label>Units
-      <select id="system">
-        <option value="imperial">Imperial (sfm & inch)</option>
-        <option value="metric">Metric (m/min & mm)</option>
-      </select>
-    </label>
+  <label>Units
+    <select id="system">
+      <option value="imperial">Imperial (sfm & inch)</option>
+      <option value="metric">Metric (m/min & mm)</option>
+    </select>
+  </label>
 
-    <label>Cutting speed Vc
-      <input id="vc" type="number" value="400">
-    </label>
+  <label>Cutting speed Vc
+    <input id="vc" type="number" value="400" step="any">
+  </label>
 
-    <label>Workpiece diameter D
-      <input id="d" type="number" value="1.0">
-    </label>
+  <label>Workpiece diameter D
+    <input id="d" type="number" value="1.0" step="any">
+  </label>
 
-    <label>Rounding
-      <select id="round">
-        <option value="1">Nearest 1</option>
-        <option value="5">Nearest 5</option>
-        <option value="10" selected>Nearest 10</option>
-        <option value="25">Nearest 25</option>
-        <option value="50">Nearest 50</option>
-        <option value="100">Nearest 100</option>
-      </select>
-    </label>
+  <label>Rounding
+    <select id="round">
+      <option value="1">Nearest 1</option>
+      <option value="5">Nearest 5</option>
+      <option value="10" selected>Nearest 10</option>
+      <option value="25">Nearest 25</option>
+      <option value="50">Nearest 50</option>
+      <option value="100">Nearest 100</option>
+    </select>
+  </label>
 
-    <label>Feed per rev (f<sub>n</sub>)
-      <input id="fn" type="number" value="0.006" step="any">
-    </label>
-  </div>
+  <label>Feed per rev (f<sub>n</sub>)
+    <input id="fn" type="number" value="0.006" step="any">
+  </label>
 
   <div class="result">RPM: <span id="rpm">—</span></div>
   <div class="result">Feed rate: <span id="vf">—</span> <span id="vfunit">ipm</span></div>
@@ -87,13 +83,13 @@ function compute(){
   const Vc=+$("vc").value;
   const D=+$("d").value;
   const step=+$("round").value;
-  let n=sys==="imperial"?(12*Vc)/(Math.PI*D):(1000*Vc)/(Math.PI*D);
+  const n = sys==="imperial" ? (12*Vc)/(Math.PI*D) : (1000*Vc)/(Math.PI*D);
   const nR=roundTo(n,step);
   $("rpm").textContent=nR;
 
   const fn=+$("fn").value||0;
-  let vf=nR*fn;
-  $("vfunit").textContent=sys==="imperial"?"ipm":"mm/min";
+  const vf=nR*fn;
+  $("vfunit").textContent = (sys==="imperial") ? "ipm" : "mm/min";
   $("vf").textContent=vf.toFixed(3);
 }
 ["system","vc","d","round","fn"].forEach(id=>$(id).addEventListener("input",compute));
