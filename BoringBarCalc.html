@@ -6,55 +6,54 @@
 <title>Boring RPM Calculator</title>
 <style>
   body { font-family: sans-serif; padding: 1em; }
-  label { display:block; margin-top:1em; }
-  input, select {
-    padding:0.5em;
-    font-size:1em;
-    margin-top:0.3em;
+  .form-row {
+    display: flex;
+    gap: 12px;             /* spacing between boxes */
+    flex-wrap: wrap;       /* wrap to next line on small screens */
+    margin-top: 1em;
   }
-  /* make number boxes narrower */
-  input[type="number"] { width:120px; }
-  /* specific ones */
-#system { width:220px; }   /* Units dropdown */
-#round  { width:120px; }   /* Rounding dropdown */
-  .result { margin-top:1.2em; font-size:1.2em; font-weight:bold; }
-  .small { font-size:0.9em; color:#555; }
+  input[type="number"], select {
+    padding: 0.5em;
+    font-size: 1em;
+  }
+  /* custom widths */
+  #system { width: 200px; }
+  #round  { width: 100px; }
+  input[type="number"] { width: 100px; }
+
+  .result {
+    margin-top: 1.2em;
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+  .small { font-size:0.9em; color:#555; margin-top:0.5em; }
 </style>
 </head>
 <body>
   <h2>Boring RPM Calculator</h2>
 
-  <label>Units
+  <div class="form-row">
     <select id="system">
       <option value="imperial">Imperial (sfm & inch)</option>
       <option value="metric">Metric (m/min & mm)</option>
     </select>
-  </label>
 
-  <label>Cutting speed Vc
-    <input id="vc" type="number" value="400">
-  </label>
+    <input id="vc" type="number" value="400" placeholder="Vc">
+    <input id="d" type="number" value="1.0" placeholder="D">
 
-  <label>Workpiece diameter D
-    <input id="d" type="number" value="1.0">
-  </label>
-
-  <label>Rounding
     <select id="round">
-      <option value="1">Nearest 1</option>
-      <option value="5">Nearest 5</option>
-      <option value="10" selected>Nearest 10</option>
-      <option value="25">Nearest 25</option>
-      <option value="50">Nearest 50</option>
-      <option value="100">Nearest 100</option>
+      <option value="1">±1</option>
+      <option value="5">±5</option>
+      <option value="10" selected>±10</option>
+      <option value="25">±25</option>
+      <option value="50">±50</option>
+      <option value="100">±100</option>
     </select>
-  </label>
+
+    <input id="fn" type="number" value="0.006" step="any" placeholder="fₙ">
+  </div>
 
   <div class="result">RPM: <span id="rpm">—</span></div>
-
-  <label>Feed per rev (f<sub>n</sub>)
-    <input id="fn" type="number" value="0.006" step="any">
-  </label>
   <div class="result">Feed rate: <span id="vf">—</span> <span id="vfunit">ipm</span></div>
   <div class="small">Formula: Vf = n · f<sub>n</sub></div>
 
@@ -72,11 +71,7 @@ function compute(){
 
   const fn=+$("fn").value||0;
   let vf=nR*fn;
-  if(sys==="imperial"){
-    $("vfunit").textContent="ipm";
-  } else {
-    $("vfunit").textContent="mm/min";
-  }
+  $("vfunit").textContent=sys==="imperial"?"ipm":"mm/min";
   $("vf").textContent=vf.toFixed(3);
 }
 ["system","vc","d","round","fn"].forEach(id=>$(id).addEventListener("input",compute));
